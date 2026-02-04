@@ -97,15 +97,13 @@
             flex-shrink: 0;
         }
 
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 1px solid var(--dim);
-            margin-bottom: 15px;
-            filter: grayscale(100%);
-            transition: all 0.3s ease;
-        }
+       .avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 0;
+    object-fit: contain;
+    background: transparent;
+}
 
         .avatar:hover {
             filter: grayscale(0%);
