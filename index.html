@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Terminal Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --text-color: #d4d4d4;
+            --accent: #ffffff;
+            --dim: #555555;
+            --box-bg: #1a1a1a;
+            --box-border: #333333;
+            --hacker-green: #33ff00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 50px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            overflow: hidden; /* Mencegah scroll body saat loading */
+        }
+
+        /* --- LOADING SCREEN HACKER --- */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 9999;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-size: 14px;
+            color: var(--hacker-green);
+            overflow: hidden;
+        }
+
+        #loading-text {
+            white-space: pre-wrap;
+            opacity: 0.9;
+        }
+
+        .loading-bar {
+            margin-top: 20px;
+            width: 100%;
+            height: 4px;
+            background: #111;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--hacker-green);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* --- KONTAINER UTAMA --- */
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            opacity: 0; /* Awalnya tersembunyi */
+            transition: opacity 1s ease-in;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 1px solid var(--dim);
+            margin-bottom: 15px;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+
+        .avatar:hover {
+            filter: grayscale(0%);
+            border-color: var(--accent);
+        }
+
+        h1 {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .bio {
+            color: var(--dim);
+            font-size: 0.9rem;
+        }
+
+        .socials {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .socials a {
+            color: var(--dim);
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .socials a:hover {
+            color: var(--accent);
+        }
+
+        /* Terminal Window */
+        .terminal-window {
+            background: rgba(26, 26, 26, 0.4);
+            border: 1px solid var(--box-border);
+            border-radius: 8px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #output {
+            padding: 20px;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            flex-grow: 1; 
+            min-height: 0;
+        }
+
+        /* Placeholder Logic CSS */
+        input::placeholder {
+            color: var(--dim);
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Kotak Perintah */
+        .cmd-box {
+            background-color: var(--box-bg);
+            border: 1px solid var(--box-border);
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            display: table;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .cmd-box-header {
+            border-bottom: 1px solid var(--box-border);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .cmd-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        .cmd-row span:first-child {
+            color: #7aa2f7;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 15px;
+            background: #111;
+            border-top: 1px solid var(--box-border);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt-symbol {
+            color: var(--accent);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+        .error { color: #f7768e; }
+    </style>
+</head>
+<body>
+
+    <!-- LAYAR LOADING -->
+    <div id="loading-screen">
+        <div id="loading-text"></div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- KONTEN UTAMA -->
+    <div class="container" id="main-content">
+        <header>
+            <img src="https://picsum.photos/seed/hacker/200/200" alt="Avatar" class="avatar">
+            <h1>Alex Dev</h1>
+            <p class="bio">System Administrator | Ethical Hacker</p>
+            <div class="socials">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </header>
+
+        <main class="terminal-window">
+            <div id="output">
+                <div class="log-entry">Connection established securely.</div>
+                <div class="log-entry">Ready.</div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <span class="prompt-symbol">➜</span>
+                    <!-- Placeholder HTML Attribute -->
+                    <input type="text" id="cmd-input" placeholder="Type 'help' to begin" autocomplete="off" autofocus>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingText = document.getElementById('loading-text');
+        const progressBar = document.getElementById('progress-bar');
+        const mainContent = document.getElementById('main-content');
+        const input = document.getElementById('cmd-input');
+        const output = document.getElementById('output');
+
+        // --- SCRIPT LOADING SCREEN HACKER ---
+        const bootLogs = [
+            "Initializing kernel...",
+            "Loading drivers...",
+            "Mounting file system...",
+            "Checking memory integrity...",
+            "Bypassing firewall protocols...",
+            "Accessing mainframe...",
+            "Decrypting user profile...",
+            "Rendering interface...",
+            "System ready."
+        ];
+
+        let logIndex = 0;
+        let progress = 0;
+
+        function runLoadingSequence() {
+            const interval = setInterval(() => {
+                // 1. Tambah teks log secara acak
+                if (Math.random() > 0.3 && logIndex < bootLogs.length) {
+                    loadingText.textContent += bootLogs[logIndex] + "\n";
+                    logIndex++;
+                } else if (Math.random() > 0.8) {
+                    // Tambahkan kode hex acak agar terlihat keren
+                    loadingText.textContent += `0x${Math.floor(Math.random()*16777215).toString(16)} [OK]\n`;
+                }
+
+                // 2. Tambah progress bar
+                progress += Math.random() * 5;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = progress + "%";
+
+                // 3. Scroll ke bawah layar loading
+                loadingScreen.scrollTop = loadingScreen.scrollHeight;
+
+                // 4. Selesai
+                if (progress === 100 && logIndex >= bootLogs.length) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        // Fade out loading screen
+                        loadingScreen.style.opacity = '0';
+                        loadingScreen.style.transition = 'opacity 0.8s ease-out';
+                        
+                        // Tampilkan konten utama
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            document.body.style.overflow = 'auto'; // Kembalikan scroll
+                            mainContent.style.opacity = '1';
+                            input.focus();
+                        }, 800);
+                    }, 500);
+                }
+            }, 80); // Kecepatan log (makin kecil makin cepat)
+        }
+
+        // Jalankan loading saat halaman dimuat
+        window.addEventListener('load', runLoadingSequence);
+
+        // --- SCRIPT TERMINAL UTAMA ---
+        const db = {
+            help: {
+                title: 'Available Commands',
+                items: [
+                    { cmd: 'about', desc: 'Tentang saya' },
+                    { cmd: 'skills', desc: 'Daftar teknologi' },
+                    { cmd: 'project', desc: 'Proyek terbaru' },
+                    { cmd: 'album', desc: 'Galeri foto' },
+                    { cmd: 'lorem', desc: 'Generate teks panjang (Tes Scroll)' },
+                    { cmd: 'clear', desc: 'Bersihkan terminal' }
+                ]
+            },
+            about: {
+                title: 'About Me',
+                type: 'text',
+                content: 'Saya adalah pengembang yang menyukai sistem keamanan dan desain minimalis.'
+            },
+            skills: {
+                title: 'Tech Stack',
+                items: [
+                    { cmd: 'Frontend', desc: 'React, Vue, HTML, CSS' },
+                    { cmd: 'Backend', desc: 'Node.js, Python, Go' },
+                    { cmd: 'Security', desc: 'Penetration Testing, Network Sec' }
+                ]
+            },
+            project: {
+                title: 'Projects',
+                items: [
+                    { cmd: 'Secure-Chat', desc: 'End-to-End Encryption' },
+                    { cmd: 'Port-Scanner', desc: 'Python Network Tool' },
+                    { cmd: 'Portfolio v2', desc: 'HTML/CSS' }
+                ]
+            },
+            album: {
+                title: 'My Album',
+                items: [
+                    { cmd: 'Server_Room.jpg', desc: '4.5MB' },
+                    { cmd: 'Code_Rain.png', desc: '1.2MB' }
+                ]
+            },
+            lorem: {
+                title: 'Test Content',
+                type: 'text',
+                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '.repeat(5)
+            }
+        };
+
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const cmd = input.value.trim().toLowerCase();
+                
+                createLogEntry(`➜ ${input.value}`);
+                
+                if (cmd === 'clear') {
+                    output.innerHTML = '';
+                } else if (cmd === '') {
+                    // Do nothing
+                } else if (db[cmd]) {
+                    renderBox(db[cmd]);
+                } else {
+                    createLogEntry(`Command not found: ${cmd}`, 'error');
+                }
+
+                input.value = '';
+                scrollToBottom();
+            }
+        });
+
+        document.addEventListener('click', () => input.focus());
+
+        function createLogEntry(text, type = 'normal') {
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            if (type === 'error') div.classList.add('error');
+            div.innerText = text;
+            output.appendChild(div);
+        }
+
+        function renderBox(data) {
+            const boxDiv = document.createElement('div');
+            boxDiv.className = 'cmd-box';
+
+            const header = document.createElement('div');
+            header.className = 'cmd-box-header';
+            header.innerText = data.title;
+            boxDiv.appendChild(header);
+
+            if (data.type === 'text') {
+                const content = document.createElement('div');
+                content.style.color = '#d4d4d4';
+                content.innerText = data.content;
+                boxDiv.appendChild(content);
+            } else {
+                data.items.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'cmd-row';
+                    row.innerHTML = `<span>${item.cmd}</span><span>${item.desc}</span>`;
+                    boxDiv.appendChild(row);
+                });
+            }
+
+            output.appendChild(boxDiv);
+        }
+
+        function scrollToBottom() {
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+</html>
