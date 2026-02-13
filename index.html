@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Max NM Rantau</title>
+    <title>Secure Terminal Access</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-color: #0d0d0d;
-            --text-color: #d4d4d4;
-            --accent: #ffffff;
-            --dim: #555555;
-            --box-bg: #1a1a1a;
-            --box-border: #333333;
-            --hacker-green: #33ff00;
+            --text-color: #0F0; /* Hijau Matrix */
+            --text-accent: #FFF;
+            --dim: #008F11;
+            --box-bg: rgba(0, 0, 0, 0.85);
+            --box-border: #008F11;
+            --error: #ff3333;
         }
 
         * {
@@ -25,19 +24,119 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: #000;
             color: var(--text-color);
             font-family: 'JetBrains Mono', monospace;
             font-size: 16px;
             line-height: 1.6;
-            padding: 50px 20px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            overflow: hidden; /* Mencegah scroll body saat loading */
+            align-items: center;
+            overflow: hidden;
         }
 
-        /* --- LOADING SCREEN HACKER --- */
+        /* --- 1. MATRIX BACKGROUND CANVAS --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            display: block;
+        }
+
+        /* --- 2. LOGIN SCREEN --- */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.5s ease;
+        }
+
+        .login-box {
+            border: 2px solid var(--box-border);
+            padding: 40px;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            text-align: center;
+            width: 350px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--text-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--dim);
+        }
+
+        .login-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid var(--dim);
+            color: var(--text-color);
+            padding: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .login-input:focus {
+            border-color: var(--text-color);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: #003300;
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            padding: 10px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            background: var(--text-color);
+            color: #000;
+            box-shadow: 0 0 15px var(--text-color);
+        }
+
+        #login-msg {
+            margin-top: 15px;
+            height: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .msg-error { color: var(--error); text-shadow: 0 0 5px red; }
+        .msg-success { color: var(--text-color); }
+
+        /* --- 3. LOADING SCREEN --- */
         #loading-screen {
             position: fixed;
             top: 0;
@@ -45,28 +144,27 @@
             width: 100%;
             height: 100%;
             background-color: #000;
-            z-index: 9999;
-            padding: 50px;
+            z-index: 2000;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             font-size: 14px;
-            color: var(--hacker-green);
+            color: var(--text-color);
             overflow: hidden;
+            opacity: 0; /* Awalnya hidden */
+            pointer-events: none;
+            transition: opacity 0.5s ease;
         }
 
-        #loading-text {
-            white-space: pre-wrap;
-            opacity: 0.9;
-        }
-
-        .loading-bar {
-            margin-top: 20px;
+        .loading-bar-container {
             width: 100%;
             height: 4px;
-            background: #111;
+            background: #001100;
             position: relative;
             overflow: hidden;
+            margin-top: 20px;
+            border: 1px solid var(--dim);
         }
 
         .loading-progress {
@@ -74,397 +172,416 @@
             left: 0;
             top: 0;
             height: 100%;
-            background: var(--hacker-green);
+            background: var(--text-color);
             width: 0%;
-            transition: width 0.1s linear;
+            box-shadow: 0 0 10px var(--text-color);
         }
 
-        /* --- KONTAINER UTAMA --- */
+        /* --- 4. MAIN PROFILE --- */
         .container {
             width: 100%;
-            max-width: 650px;
+            max-width: 700px;
             display: flex;
             flex-direction: column;
             height: 80vh;
-            opacity: 0; /* Awalnya tersembunyi */
+            opacity: 0; 
             transition: opacity 1s ease-in;
+            position: relative;
+            z-index: 10;
+            margin: 20px;
         }
 
-        /* Header */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            flex-shrink: 0;
+        header { text-align: center; margin-bottom: 30px; flex-shrink: 0; }
+
+        .avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 2px solid var(--text-color); margin-bottom: 15px;
+            filter: grayscale(100%) sepia(100%) hue-rotate(50deg) saturate(300%);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--text-color);
         }
+        .avatar:hover { filter: none; border-color: var(--text-accent); box-shadow: 0 0 20px var(--text-accent); }
+        h1 { font-weight: 700; color: var(--text-accent); margin-bottom: 5px; text-shadow: 0 0 5px var(--text-color); }
+        .bio { color: var(--dim); font-size: 0.9rem; }
+        .socials { margin-top: 15px; display: flex; justify-content: center; gap: 15px; }
+        .socials a { color: var(--text-color); font-size: 1.1rem; transition: color 0.2s; }
+        .socials a:hover { color: var(--text-accent); text-shadow: 0 0 8px var(--text-color); }
 
-       .avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 0;
-    object-fit: contain;
-    background: transparent;
-}
-
-        .avatar:hover {
-            filter: grayscale(0%);
-            border-color: var(--accent);
-        }
-
-        h1 {
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 5px;
-            letter-spacing: -0.5px;
-        }
-
-        .bio {
-            color: var(--dim);
-            font-size: 0.9rem;
-        }
-
-        .socials {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .socials a {
-            color: var(--dim);
-            font-size: 1.1rem;
-            transition: color 0.2s;
-        }
-
-        .socials a:hover {
-            color: var(--accent);
-        }
-
-        /* Terminal Window */
         .terminal-window {
-            background: rgba(26, 26, 26, 0.4);
+            background: var(--box-bg);
             border: 1px solid var(--box-border);
             border-radius: 8px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            backdrop-filter: blur(5px);
         }
 
-        #output {
-            padding: 20px;
-            margin-bottom: 0;
-            font-size: 0.95rem;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            flex-grow: 1; 
-            min-height: 0;
-        }
+        #output { padding: 20px; margin-bottom: 0; font-size: 0.95rem; overflow-y: auto; scroll-behavior: smooth; flex-grow: 1; min-height: 0; }
+        .log-entry { margin-bottom: 8px; opacity: 0; animation: fadeIn 0.3s forwards; text-shadow: 0 0 2px rgba(0,0,0,0.8); }
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        /* Placeholder Logic CSS */
-        input::placeholder {
-            color: var(--dim);
-            opacity: 0.5;
-            font-style: italic;
-        }
-
-        .log-entry {
-            margin-bottom: 8px;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        /* Kotak Perintah */
         .cmd-box {
-            background-color: var(--box-bg);
+            background-color: rgba(0, 20, 0, 0.9);
             border: 1px solid var(--box-border);
             border-radius: 6px;
             padding: 15px;
             margin: 15px 0;
             display: table;
             width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
         }
+        .cmd-box-header { border-bottom: 1px solid var(--box-border); padding-bottom: 8px; margin-bottom: 10px; font-weight: bold; color: var(--text-accent); font-size: 0.85rem; text-transform: uppercase; text-shadow: 0 0 5px var(--text-color); }
+        .cmd-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; }
+        .cmd-row span:first-child { color: var(--text-color); font-weight: bold; margin-right: 20px; }
 
-        .cmd-box-header {
-            border-bottom: 1px solid var(--box-border);
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: var(--accent);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
+        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 10px; }
+        .photo-item { position: relative; width: 100%; padding-top: 100%; overflow: hidden; border: 1px solid var(--dim); border-radius: 4px; background: #000; }
+        .photo-item img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) sepia(100%) hue-rotate(50deg); transition: all 0.4s ease; cursor: pointer; }
+        .photo-item:hover img { filter: none; transform: scale(1.1); z-index: 2; }
 
-        .cmd-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 0.9rem;
-        }
+        .input-area { padding: 15px; background: rgba(0, 0, 0, 0.95); border-top: 1px solid var(--box-border); flex-shrink: 0; }
+        .input-wrapper { display: flex; align-items: center; }
+        .prompt-symbol { color: var(--text-accent); margin-right: 10px; font-weight: bold; }
+        input { background: transparent; border: none; color: var(--text-color); font-family: 'JetBrains Mono', monospace; font-size: 1rem; width: 100%; outline: none; text-shadow: 0 0 3px #000; }
 
-        .cmd-row span:first-child {
-            color: #7aa2f7;
-            font-weight: bold;
-            margin-right: 20px;
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: 15px;
-            background: #111;
-            border-top: 1px solid var(--box-border);
-            flex-shrink: 0;
-        }
-
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-        }
-
-        .prompt-symbol {
-            color: var(--accent);
-            margin-right: 10px;
-            font-weight: bold;
-        }
-
-        input {
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            width: 100%;
-            outline: none;
-        }
-
-        /* Scrollbar */
+        input::placeholder { color: var(--dim); opacity: 0.7; font-style: italic; }
+        
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #666; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-color); }
+        .error { color: var(--error); text-shadow: 0 0 5px red; }
 
-        .error { color: #f7768e; }
     </style>
 </head>
 <body>
 
-    <!-- LAYAR LOADING -->
+    <!-- Canvas Matrix Background -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- 1. LAYAR LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2><i class="fas fa-lock"></i> Access Denied</h2>
+            <div class="input-group">
+                <label>PASSWORD REQUIRED</label>
+                <input type="password" id="login-password" class="login-input" placeholder="Enter password..." autocomplete="off">
+            </div>
+            <button class="login-btn" id="login-btn">AUTHENTICATE</button>
+            <div id="login-msg"></div>
+        </div>
+    </div>
+
+    <!-- 2. LAYAR LOADING (Hidden awalnya) -->
     <div id="loading-screen">
         <div id="loading-text"></div>
-        <div class="loading-bar">
+        <div class="loading-bar-container">
             <div class="loading-progress" id="progress-bar"></div>
         </div>
     </div>
 
-    <!-- KONTEN UTAMA -->
+    <!-- 3. KONTEN UTAMA (Hidden awalnya) -->
     <div class="container" id="main-content">
         <header>
-            <img src="https://i.ibb.co.com/mrSjF297/m.png" alt="Makmur" width="80" height="80" class="avatar">
-            <h1>Makmurriansyah</h1>
-            <p class="bio">Network Management at Global Jet Express Cabang Rantau</p>
+            <img src="https://picsum.photos/seed/matrix/200/200" alt="Avatar" class="avatar">
+            <h1>Neo Dev</h1>
+            <p class="bio">White Hat Hacker | Full Stack Developer</p>
             <div class="socials">
-                <a href="https://github.com/maxnmrantau"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="mailto:makmurriansyah@protonmail.com"><i class="fas fa-envelope"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
             </div>
         </header>
 
         <main class="terminal-window">
             <div id="output">
-                <div class="log-entry">Connection established securely.</div>
-                <div class="log-entry">Ready.</div>
+                <div class="log-entry">Matrix connection established...</div>
+                <div class="log-entry">Type <span style="color:white">'help'</span> to see commands.</div>
             </div>
 
             <div class="input-area">
                 <div class="input-wrapper">
                     <span class="prompt-symbol">➜</span>
-                    <!-- Placeholder HTML Attribute -->
-                    <input type="text" id="cmd-input" placeholder="Ketik 'perintah' untuk memulai" autocomplete="off" autofocus>
+                    <input type="text" id="cmd-input" placeholder="Type 'help' to begin" autocomplete="off" autofocus>
                 </div>
             </div>
         </main>
     </div>
 
-    <script>
-        const loadingScreen = document.getElementById('loading-screen');
-        const loadingText = document.getElementById('loading-text');
-        const progressBar = document.getElementById('progress-bar');
-        const mainContent = document.getElementById('main-content');
-        const input = document.getElementById('cmd-input');
-        const output = document.getElementById('output');
+<script>
+    /* --- 1. MATRIX BACKGROUND --- */
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = 1;
 
-        // --- SCRIPT LOADING SCREEN HACKER ---
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0F0';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars.charAt(Math.floor(Math.random() * chars.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(drawMatrix, 33);
+    window.addEventListener('resize', () => { 
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight; 
+    });
+
+    /* --- 2. LOGIC LOGIN (FIXED) --- */
+    const loginScreen = document.getElementById('login-screen');
+    const loginInput = document.getElementById('login-password');
+    const loginBtn = document.getElementById('login-btn');
+    const loginMsg = document.getElementById('login-msg');
+    const correctPassword = "administrator";
+
+    // Fungsi khusus untuk menjaga fokus agar bisa mengetik
+    function keepFocusLogin() {
+        // Jika layar login masih tampil, paksa fokus ke input password
+        if (loginScreen.style.display !== 'none') {
+            loginInput.focus();
+        }
+    }
+
+    // Jalankan fokus saat halaman dimuat
+    window.onload = function() {
+        keepFocusLogin();
+    };
+
+    // Jika user mengklik sembarang tempat saat di halaman login, kembalikan fokus ke password
+    document.addEventListener('click', (e) => {
+        keepFocusLogin();
+    });
+
+    function checkLogin() {
+        const val = loginInput.value;
+        if (val === correctPassword) {
+            loginMsg.className = 'msg-success';
+            loginMsg.innerText = "ACCESS GRANTED. LOADING...";
+            loginBtn.disabled = true;
+            loginInput.disabled = true;
+            
+            // Hapus listener klik global agar tidak mengganggu fokus terminal nanti
+            document.removeEventListener('click', keepFocusLogin);
+
+            // Delay sebentar sebelum pindah ke loading screen
+            setTimeout(() => {
+                loginScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loginScreen.style.display = 'none';
+                    startLoadingSequence(); // Mulai loading hacker
+                }, 500);
+            }, 1000);
+
+        } else {
+            loginMsg.className = 'msg-error';
+            loginMsg.innerText = "ACCESS DENIED. WRONG PASSWORD.";
+            loginInput.value = '';
+            keepFocusLogin(); // Pastikan fokus kembali setelah error
+            
+            // Efek getar
+            const box = document.querySelector('.login-box');
+            box.style.transform = "translateX(5px)";
+            setTimeout(() => box.style.transform = "translateX(-5px)", 50);
+            setTimeout(() => box.style.transform = "translateX(5px)", 100);
+            setTimeout(() => box.style.transform = "translateX(0)", 150);
+        }
+    }
+
+    loginBtn.addEventListener('click', checkLogin);
+    loginInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkLogin();
+    });
+
+    /* --- 3. LOGIC LOADING SCREEN --- */
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingText = document.getElementById('loading-text');
+    const progressBar = document.getElementById('progress-bar');
+    const mainContent = document.getElementById('main-content');
+    const cmdInput = document.getElementById('cmd-input');
+    const output = document.getElementById('output');
+
+    function startLoadingSequence() {
+        loadingScreen.style.opacity = '1';
+        loadingScreen.style.pointerEvents = 'auto'; // Pastikan bisa diklik jika perlu
+
         const bootLogs = [
-            "Initializing kernel...",
-            "Loading drivers...",
-            "Mounting file system...",
-            "Checking memory integrity...",
-            "Bypassing firewall protocols...",
-            "Accessing mainframe...",
-            "Decrypting user profile...",
-            "Rendering interface...",
+            "Decrypting secure connection...",
+            "Downloading user profile...",
+            "Loading kernel modules...",
+            "Verifying integrity...",
             "System ready."
         ];
 
         let logIndex = 0;
         let progress = 0;
 
-        function runLoadingSequence() {
-            const interval = setInterval(() => {
-                // 1. Tambah teks log secara acak
-                if (Math.random() > 0.3 && logIndex < bootLogs.length) {
-                    loadingText.textContent += bootLogs[logIndex] + "\n";
-                    logIndex++;
-                } else if (Math.random() > 0.8) {
-                    // Tambahkan kode hex acak agar terlihat keren
-                    loadingText.textContent += `0x${Math.floor(Math.random()*16777215).toString(16)} [OK]\n`;
-                }
+        const interval = setInterval(() => {
+            if (Math.random() > 0.4 && logIndex < bootLogs.length) {
+                loadingText.textContent += bootLogs[logIndex] + "\n";
+                logIndex++;
+            } else if (Math.random() > 0.8) {
+                loadingText.textContent += `0x${Math.floor(Math.random()*16777215).toString(16)} [OK]\n`;
+            }
 
-                // 2. Tambah progress bar
-                progress += Math.random() * 5;
-                if (progress > 100) progress = 100;
-                progressBar.style.width = progress + "%";
+            progress += Math.random() * 4;
+            if (progress > 100) progress = 100;
+            progressBar.style.width = progress + "%";
+            loadingScreen.scrollTop = loadingScreen.scrollHeight;
 
-                // 3. Scroll ke bawah layar loading
-                loadingScreen.scrollTop = loadingScreen.scrollHeight;
-
-                // 4. Selesai
-                if (progress === 100 && logIndex >= bootLogs.length) {
-                    clearInterval(interval);
+            if (progress === 100 && logIndex >= bootLogs.length) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
                     setTimeout(() => {
-                        // Fade out loading screen
-                        loadingScreen.style.opacity = '0';
-                        loadingScreen.style.transition = 'opacity 0.8s ease-out';
-                        
-                        // Tampilkan konten utama
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                            document.body.style.overflow = 'auto'; // Kembalikan scroll
-                            mainContent.style.opacity = '1';
-                            input.focus();
-                        }, 800);
-                    }, 500);
-                }
-            }, 80); // Kecepatan log (makin kecil makin cepat)
-        }
-
-        // Jalankan loading saat halaman dimuat
-        window.addEventListener('load', runLoadingSequence);
-
-        // --- SCRIPT TERMINAL UTAMA ---
-        const db = {
-            perintah: {
-                title: 'Available Commands',
-                items: [
-                    { cmd: 'tentang', desc: 'Tentang saya' },
-                    { cmd: 'skill', desc: 'Cek aja' },
-                    { cmd: 'repositori', desc: 'Github Repository' },
-                    { cmd: 'album', desc: 'Galeri foto' },
-                    { cmd: 'kata-kata', desc: 'Kata-kata hari ini' },
-                    { cmd: 'clear', desc: 'Bersihkan terminal' }
-                ]
-            },
-            tentang: {
-                title: 'Tentang Saya',
-                type: 'text',
-                content: 'Nama saya Makmurriansyah saat ini bekerja sebagai staff Network Management di PT. Global Jet Express Cabang Rantau.'
-            },
-            skill: {
-                title: 'Keahlian',
-                items: [
-                    { cmd: 'Makan' },
-                    { cmd: 'Kerja' },
-                    { cmd: 'Tidur' },
-                    { cmd: 'Cuti', desc: 'diambil kalo lagi bosan' },
-                ]
-            },
-            repositori: {
-                title: 'Repositori',
-                items: [
-                    { cmd: 'E-sign', desc: 'Tanda Tangan Digital pada PDF'  },
-                    { cmd: 'Port-Scanner', desc: 'Python Network Tool' },
-                    { cmd: 'Portfolio v2', desc: 'HTML/CSS' }
-                ]
-            },
-            album: {
-                title: 'My Album',
-                items: [
-                    { cmd: 'Server_Room.jpg', desc: '4.5MB' },
-                    { cmd: 'Code_Rain.png', desc: '1.2MB' }
-                ]
-            },
-            kata-kata: {
-                title: 'KATA-KATA',
-                type: 'text',
-                content: 'Tidak ada kata-kata hari ini. '.repeat(5)
+                        loadingScreen.style.display = 'none';
+                        mainContent.style.opacity = '1';
+                        cmdInput.focus(); // Fokus otomatis ke terminal setelah loading selesai
+                    }, 800);
+                }, 500);
             }
-        };
+        }, 60);
+    }
 
-        input.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                const cmd = input.value.trim().toLowerCase();
-                
-                createLogEntry(`➜ ${input.value}`);
-                
-                if (cmd === 'clear') {
-                    output.innerHTML = '';
-                } else if (cmd === '') {
-                    // Do nothing
-                } else if (db[cmd]) {
-                    renderBox(db[cmd]);
-                } else {
-                    createLogEntry(`Command not found: ${cmd}`, 'error');
-                }
-
-                input.value = '';
-                scrollToBottom();
-            }
-        });
-
-        document.addEventListener('click', () => input.focus());
-
-        function createLogEntry(text, type = 'normal') {
-            const div = document.createElement('div');
-            div.className = 'log-entry';
-            if (type === 'error') div.classList.add('error');
-            div.innerText = text;
-            output.appendChild(div);
+    /* --- 4. LOGIC TERMINAL COMMANDS --- */
+    const db = {
+        help: {
+            title: 'Available Commands',
+            type: 'list',
+            items: [
+                { cmd: 'about', desc: 'Tentang saya' },
+                { cmd: 'album', desc: 'Lihat galeri foto' },
+                { cmd: 'project', desc: 'Daftar proyek' },
+                { cmd: 'skills', desc: 'Tech Stack' },
+                { cmd: 'clear', desc: 'Bersihkan terminal' }
+            ]
+        },
+        about: {
+            title: 'About Me',
+            type: 'text',
+            content: 'Saya adalah pengembang yang hidup di dalam Matrix. Suka membuat halaman web yang cepat dan aman.'
+        },
+        project: {
+            title: 'Projects',
+            type: 'list',
+            items: [
+                { cmd: 'Matrix-UI', desc: 'Web Framework' },
+                { cmd: 'Neo-Chat', desc: 'Encrypted Messaging' }
+            ]
+        },
+        skills: {
+            title: 'Tech Stack',
+            type: 'list',
+            items: [
+                { cmd: 'Frontend', desc: 'HTML, CSS, React' },
+                { cmd: 'Backend', desc: 'Node.js, Python' }
+            ]
+        },
+        album: {
+            title: 'Photo Gallery',
+            type: 'album',
+            images: [
+                'https://picsum.photos/seed/m1/400/400',
+                'https://picsum.photos/seed/m2/400/400',
+                'https://picsum.photos/seed/m3/400/400',
+                'https://picsum.photos/seed/m4/400/400',
+                'https://picsum.photos/seed/m5/400/400',
+                'https://picsum.photos/seed/m6/400/400'
+            ]
         }
+    };
 
-        function renderBox(data) {
-            const boxDiv = document.createElement('div');
-            boxDiv.className = 'cmd-box';
-
-            const header = document.createElement('div');
-            header.className = 'cmd-box-header';
-            header.innerText = data.title;
-            boxDiv.appendChild(header);
-
-            if (data.type === 'text') {
-                const content = document.createElement('div');
-                content.style.color = '#d4d4d4';
-                content.innerText = data.content;
-                boxDiv.appendChild(content);
+    cmdInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const cmd = cmdInput.value.trim().toLowerCase();
+            createLogEntry(`➜ ${cmdInput.value}`);
+            
+            if (cmd === 'clear') {
+                output.innerHTML = '';
+            } else if (cmd === '') {
+            } else if (db[cmd]) {
+                renderBox(db[cmd]);
             } else {
-                data.items.forEach(item => {
-                    const row = document.createElement('div');
-                    row.className = 'cmd-row';
-                    row.innerHTML = `<span>${item.cmd}</span><span>${item.desc}</span>`;
-                    boxDiv.appendChild(row);
-                });
+                createLogEntry(`Command not found: ${cmd}`, 'error');
             }
 
-            output.appendChild(boxDiv);
+            cmdInput.value = '';
+            scrollToBottom();
         }
+    });
 
-        function scrollToBottom() {
-            output.scrollTop = output.scrollHeight;
+    // Event listener klik hanya untuk terminal (bukan login, karena login sudah handle di atas)
+    document.addEventListener('click', (e) => {
+        // Hanya fokus ke terminal jika login screen sudah hilang DAN loading screen sudah hilang
+        if (loginScreen.style.display === 'none' && loadingScreen.style.display === 'none') {
+            cmdInput.focus();
         }
-    </script>
+    });
+
+    function createLogEntry(text, type = 'normal') {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        if (type === 'error') div.classList.add('error');
+        div.innerText = text;
+        output.appendChild(div);
+    }
+
+    function renderBox(data) {
+        const boxDiv = document.createElement('div');
+        boxDiv.className = 'cmd-box';
+
+        const header = document.createElement('div');
+        header.className = 'cmd-box-header';
+        header.innerText = data.title;
+        boxDiv.appendChild(header);
+
+        if (data.type === 'text') {
+            const content = document.createElement('div');
+            content.style.color = '#d4d4d4';
+            content.innerText = data.content;
+            boxDiv.appendChild(content);
+        } else if (data.type === 'list') {
+            data.items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'cmd-row';
+                row.innerHTML = `<span>${item.cmd}</span><span>${item.desc}</span>`;
+                boxDiv.appendChild(row);
+            });
+        } else if (data.type === 'album') {
+            const grid = document.createElement('div');
+            grid.className = 'album-grid';
+            data.images.forEach(imgUrl => {
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                const img = document.createElement('img');
+                img.src = imgUrl;
+                img.alt = "Photo";
+                img.loading = "lazy";
+                img.onclick = () => window.open(imgUrl, '_blank');
+                item.appendChild(img);
+                grid.appendChild(item);
+            });
+            boxDiv.appendChild(grid);
+        }
+        output.appendChild(boxDiv);
+    }
+
+    function scrollToBottom() {
+        output.scrollTop = output.scrollHeight;
+    }
+</script>
 </body>
 </html>
