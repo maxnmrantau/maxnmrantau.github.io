@@ -3,585 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Max NM Rantau</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Makmurriansyah | Network Management</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* --- CSS VARIABLES (TEMA CYBERPUNK) --- */
         :root {
-            --text-color: #0F0; /* Hijau Matrix */
-            --text-accent: #FFF;
-            --dim: #008F11;
-            --box-bg: rgba(0, 0, 0, 0.85);
-            --box-border: #008F11;
-            --error: #ff3333;
+            --bg: #0f1117;
+            --surface: #181c27;
+            --surface2: #1e2235;
+            --border: rgba(255, 255, 255, 0.1); 
+            --accent: #63d2a8; /* Mint Green */
+            --accent2: #f5c542; /* Yellow */
+            --accent-red: #ff6b6b;
+            --text: #e8eaf0;
+            --text-muted: #8b9bb4;
+            
+            --radius: 12px;
+            --font-head: 'Space Mono', monospace;
+            --font-body: 'DM Sans', sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        /* --- RESET & GLOBAL --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: #000;
-            color: var(--text-color);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 16px;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            /* Grid Background Pattern */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            padding-bottom: 60px;
         }
 
-        /* --- 1. MATRIX BACKGROUND CANVAS --- */
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            display: block;
-        }
-
-        /* --- 2. LOGIN SCREEN --- */
-        #login-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 3000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            transition: opacity 0.5s ease;
-        }
-
-        .login-box {
-            border: 2px solid var(--box-border);
-            padding: 40px;
-            background: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-            text-align: center;
-            width: 350px;
-        }
-
-        .login-box h2 {
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--text-color);
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: var(--dim);
-        }
-
-        .login-input {
-            width: 100%;
-            background: #111;
-            border: 1px solid var(--dim);
-            color: var(--text-color);
-            padding: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            outline: none;
-            transition: border 0.3s;
-        }
-
-        .login-input:focus {
-            border-color: var(--text-color);
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-        }
-
-        .login-btn {
-            width: 100%;
-            background: #003300;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            padding: 10px;
-            cursor: pointer;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: bold;
-            text-transform: uppercase;
-            transition: all 0.2s;
-        }
-
-        .login-btn:hover {
-            background: var(--text-color);
-            color: #000;
-            box-shadow: 0 0 15px var(--text-color);
-        }
-
-        #login-msg {
-            margin-top: 15px;
-            height: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .msg-error { color: var(--error); text-shadow: 0 0 5px red; }
-        .msg-success { color: var(--text-color); }
-
-        /* --- 3. LOADING SCREEN --- */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 2000;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            font-size: 14px;
-            color: var(--text-color);
-            overflow: hidden;
-            opacity: 0; /* Awalnya hidden */
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-bar-container {
-            width: 100%;
-            height: 4px;
-            background: #001100;
-            position: relative;
-            overflow: hidden;
-            margin-top: 20px;
-            border: 1px solid var(--dim);
-        }
-
-        .loading-progress {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background: var(--text-color);
-            width: 0%;
-            box-shadow: 0 0 10px var(--text-color);
-        }
-
-        /* --- 4. MAIN PROFILE --- */
         .container {
             width: 100%;
-            max-width: 700px;
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-            opacity: 0; 
-            transition: opacity 1s ease-in;
-            position: relative;
-            z-index: 10;
-            margin: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px 20px 20px;
         }
 
-        header { text-align: center; margin-bottom: 30px; flex-shrink: 0; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* --- 1. PROFILE CARD --- */
+        .profile-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px 30px;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .profile-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1; 
+        }
 
         .avatar {
-            width: 80px; height: 80px; border-radius: 50%;
-            border: 2px solid var(--text-color); margin-bottom: 15px;
-            filter: grayscale(100%) sepia(100%) hue-rotate(50deg) saturate(300%);
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px var(--text-color);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border); 
         }
-        .avatar:hover { filter: none; border-color: var(--text-accent); box-shadow: 0 0 20px var(--text-accent); }
-        h1 { font-weight: 700; color: var(--text-accent); margin-bottom: 5px; text-shadow: 0 0 5px var(--text-color); }
-        .bio { color: var(--dim); font-size: 0.9rem; }
-        .socials { margin-top: 15px; display: flex; justify-content: center; gap: 15px; }
-        .socials a { color: var(--text-color); font-size: 1.1rem; transition: color 0.2s; }
-        .socials a:hover { color: var(--text-accent); text-shadow: 0 0 8px var(--text-color); }
 
-        .terminal-window {
-            background: var(--box-bg);
-            border: 1px solid var(--box-border);
-            border-radius: 8px;
-            flex-grow: 1;
+        .text-group {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-            backdrop-filter: blur(5px);
+            justify-content: center;
         }
 
-        #output { padding: 20px; margin-bottom: 0; font-size: 0.95rem; overflow-y: auto; scroll-behavior: smooth; flex-grow: 1; min-height: 0; }
-        .log-entry { margin-bottom: 8px; opacity: 0; animation: fadeIn 0.3s forwards; text-shadow: 0 0 2px rgba(0,0,0,0.8); }
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        .cmd-box {
-            background-color: rgba(0, 20, 0, 0.9);
-            border: 1px solid var(--box-border);
-            border-radius: 6px;
-            padding: 15px;
-            margin: 15px 0;
-            display: table;
-            width: 100%;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+        .text-group h1 {
+            font-family: var(--font-head);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+            margin-bottom: 6px;
         }
-        .cmd-box-header { border-bottom: 1px solid var(--box-border); padding-bottom: 8px; margin-bottom: 10px; font-weight: bold; color: var(--text-accent); font-size: 0.85rem; text-transform: uppercase; text-shadow: 0 0 5px var(--text-color); }
-        .cmd-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; }
-        .cmd-row span:first-child { color: var(--text-color); font-weight: bold; margin-right: 20px; }
 
-        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 10px; }
-        .photo-item { position: relative; width: 100%; padding-top: 100%; overflow: hidden; border: 1px solid var(--dim); border-radius: 4px; background: #000; }
-        .photo-item img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) sepia(100%) hue-rotate(50deg); transition: all 0.4s ease; cursor: pointer; }
-        .photo-item:hover img { filter: none; transform: scale(1.1); z-index: 2; }
+        .text-group p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
 
-        .input-area { padding: 15px; background: rgba(0, 0, 0, 0.95); border-top: 1px solid var(--box-border); flex-shrink: 0; }
-        .input-wrapper { display: flex; align-items: center; }
-        .prompt-symbol { color: var(--text-accent); margin-right: 10px; font-weight: bold; }
-        input { background: transparent; border: none; color: var(--text-color); font-family: 'JetBrains Mono', monospace; font-size: 1rem; width: 100%; outline: none; text-shadow: 0 0 3px #000; }
+        .profile-right {
+            display: flex;
+            gap: 15px;
+        }
 
-        input::placeholder { color: var(--dim); opacity: 0.7; font-style: italic; }
+        .box-btn {
+            width: 50px;
+            height: 50px;
+            background: transparent; 
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .box-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(99, 210, 168, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .box-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* --- 2. PROJECTS GRID --- */
+        .category-block { margin-bottom: 40px; }
+
+        .category-title {
+            font-family: var(--font-head);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cat-web { border-color: #61dafb; }
+        .cat-desktop { border-color: var(--accent2); }
+        .cat-script { border-color: var(--accent-red); }
         
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-color); }
-        .error { color: var(--error); text-shadow: 0 0 5px red; }
+        .cat-web span { color: #61dafb; }
+        .cat-desktop span { color: var(--accent2); }
+        .cat-script span { color: var(--accent-red); }
 
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .project-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: 0.2s;
+            position: relative;
+            height: 100%;
+            overflow: visible; 
+        }
+
+        .project-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255,255,255,0.2);
+            background: var(--surface2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+
+        .project-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 0 12px 12px;
+            border-color: transparent transparent var(--border) transparent;
+            transition: 0.2s;
+        }
+        .project-card:hover::after {
+            border-color: transparent transparent var(--text) transparent;
+        }
+
+        .project-title {
+            font-family: var(--font-head);
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+            margin-top: 0px;
+        }
+
+        .project-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .card-link {
+            margin-top: auto;
+            font-family: var(--font-head);
+            font-size: 0.75rem;
+            color: var(--text);
+            display: flex; align-items: center; gap: 6px;
+            opacity: 0.7;
+        }
+        .project-card:hover .card-link { opacity: 1; color: var(--accent); }
+
+        /* Responsive Mobile */
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+                padding: 20px;
+            }
+            .profile-left { flex-direction: column; }
+            .profile-right { width: 100%; justify-content: center; }
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Canvas Matrix Background -->
-    <canvas id="matrix-canvas"></canvas>
-
-    <!-- 1. LAYAR LOGIN -->
-    <div id="login-screen">
-        <div class="login-box">
-            <h2><i class="fas fa-lock"></i> Access Denied</h2>
-            <div class="input-group">
-                <label>PASSWORD REQUIRED</label>
-                <input type="password" id="login-password" class="login-input" placeholder="Enter password..." autocomplete="off">
+    <div class="container">
+        
+        <!-- HEADER: PROFILE CARD -->
+        <header class="profile-card">
+            <div class="profile-left">
+                <img src="https://z-cdn-media.chatglm.cn/files/5898722c-242d-4901-ae02-1c88365d5583.jpg?auth_key=1877549681-4bc57293a3a44bce8b4e9183590d9262-0-39d84cca0f44e37695d2b4254948dda3" alt="Makmurriansyah" class="avatar">
+                <div class="text-group">
+                    <h1>Makmurriansyah</h1>
+                    <p>Network Management at Global Jet Express Rantau</p>
+                </div>
             </div>
-            <button class="login-btn" id="login-btn">AUTHENTICATE</button>
-            <div id="login-msg"></div>
-        </div>
-    </div>
-
-    <!-- 2. LAYAR LOADING (Hidden awalnya) -->
-    <div id="loading-screen">
-        <div id="loading-text"></div>
-        <div class="loading-bar-container">
-            <div class="loading-progress" id="progress-bar"></div>
-        </div>
-    </div>
-
-    <!-- 3. KONTEN UTAMA (Hidden awalnya) -->
-    <div class="container" id="main-content">
-        <header>
-            <img src="https://i.ibb.co.com/mrSjF297/m.png" alt="Avatar" class="avatar">
-            <h1>Makmurriansyah</h1>
-            <p class="bio">Staff Network Management PT. Global Jet Express Cabang Rantau</p>
-            <div class="socials">
-                <a href="https://github.com/maxnmrantau"><i class="fab fa-github"></i></a>
-                <a href="https://www.youtube.com/@makmurriansyah"><i class="fab fa-youtube"></i></a>
-                <a href="mailto:makmurriansyah@protonmail.com"><i class="fas fa-envelope"></i></a>
+            
+            <div class="profile-right">
+                <a href="mailto:nmrantau@gmail.com" class="box-btn" title="Email">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </a>
+                <a href="https://github.com/maxnmrantau" class="box-btn" title="GitHub">
+                    <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+                <a href="https://www.linkedin.com/in/makmurriansyah/" class="box-btn" title="LinkedIn">
+                    <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
             </div>
         </header>
 
-        <main class="terminal-window">
-            <div id="output">
-                <div class="log-entry">Matrix connection established...</div>
-                <div class="log-entry">Type <span style="color:white">'help'</span> to see commands.</div>
+        <!-- CONTENT: WEBSITE PROJECTS -->
+        <section class="category-block cat-web">
+            <div class="category-title cat-web">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <span>01. WEBSITE_PROJECTS</span>
             </div>
+            <div class="grid">
+                
+                <!-- Project 1 -->
+                <article class="project-card">
+                    <h3 class="project-title">Free PDF Tools</h3>
+                    <p class="project-desc">Alat all-in-one untuk manipulasi PDF (merge, split, compress) langsung di browser tanpa upload ke server.</p>
+                    <a href="https://free-pdftools.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                </article>
 
-            <div class="input-area">
-                <div class="input-wrapper">
-                    <span class="prompt-symbol">➜</span>
-                    <input type="text" id="cmd-input" placeholder="Type 'help' to begin" autocomplete="off" autofocus>
-                </div>
+                <!-- Project 2 -->
+                <article class="project-card">
+                    <h3 class="project-title">Batch Kolase Maker</h3>
+                    <p class="project-desc">Membuat kolase foto secara massal dengan mudah, cocok untuk kebutuhan desain cepat atau dokumentasi.</p>
+                    <a href="https://batch-kolase.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                </article>
+
+                <!-- Project 3 -->
+                <article class="project-card">
+                    <h3 class="project-title">Tanda Tangan PDF</h3>
+                    <p class="project-desc">Tambahkan tanda tangan digital ke dokumen PDF secara legal dan aman tanpa perlu software berat.</p>
+                    <a href="https://tandatangan-pdf.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                </article>
+
+                <!-- Project 4 -->
+                <article class="project-card">
+                    <h3 class="project-title">Barcode Genku</h3>
+                    <p class="project-desc">Generator barcode cepat untuk inventaris, POS, atau kebutuhan labeling lainnya dengan format standar.</p>
+                    <a href="https://barcode-genku.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                </article>
+
+                <!-- Project 5: SILENT STREAM -->
+                <article class="project-card">
+                    <h3 class="project-title">Silent Stream</h3>
+                    <p class="project-desc">Alat praktis untuk menghapus audio pada video (mute video) secara instan tanpa mengurangi kualitas visual.</p>
+                    <a href="https://silent-stream.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                </article>
+
+                <!-- Project 6: AI ANSWER KEY -->
+                <article class="project-card">
+                    <h3 class="project-title">AI Answer Key Assistant</h3>
+                    <p class="project-desc">Aplikasi berbasis AI yang dirancang untuk membantu pengajar dan siswa dalam memeriksa jawaban secara otomatis berdasarkan dokumen PDF kunci jawaban, serta membuat soal baru secara instan menggunakan teknologi Google Gemini AI.</p>
+                    <a href="https://ai-answer-key-assistant.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                </article>
+
             </div>
-        </main>
+        </section>
+
+        <!-- 2. DESKTOP (FINAL CONFIRMED LINKS) -->
+        <section class="category-block cat-desktop">
+            <div class="category-title cat-desktop">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span>02. DESKTOP_APPLICATIONS</span>
+            </div>
+            <div class="grid">
+                
+                <!-- Desktop Project 1: Network Tool -->
+                <article class="project-card">
+                    <h3 class="project-title">Network Tool</h3>
+                    <p class="project-desc">Utilitas untuk monitoring jaringan LAN kantor.</p>
+                    <a href="#" class="card-link">DOWNLOAD &#8594;</a>
+                </article>
+
+                <!-- Desktop Project 2: FILE CHECKER (CONFIRMED) -->
+                <article class="project-card">
+                    <h3 class="project-title">File Checker</h3>
+                    <p class="project-desc">Solusi otomatisasi untuk audit integritas data copy-paste. Membandingkan struktur file sumber dan tujuan, mengidentifikasi file yang hilang, serta memindahkan file tersebut ke folder khusus secara instan.</p>
+                    <!-- Link GitHub v.6.2 -->
+                    <a href="https://github.com/maxnmrantau/filechecker/releases/download/v.6.2/FileChecker-Setup.v6.2.exe" class="card-link">DOWNLOAD &#8594;</a>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- 3. SCRIPT (FINAL CONFIRMED LINKS) -->
+        <section class="category-block cat-script">
+            <div class="category-title cat-script">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <span>03. AUTOMATION_SCRIPTS</span>
+            </div>
+            <div class="grid">
+                
+                <!-- Script 1: Edge Multi-Profile Shortcut -->
+                <article class="project-card">
+                    <h3 class="project-title">Multi-Profile Edge</h3>
+                    <p class="project-desc">Otomatisasi akses browser. Secara cerdas mendeteksi seluruh profil pengguna di Microsoft Edge dan langsung membuat shortcut desktop unik untuk setiap akun secara massal.</p>
+                    <!-- Link GitHub v1.0 -->
+                    <a href="https://github.com/maxnmrantau/edgeshotcutgen/releases/download/v1.0/Edge.ShortcutGen.bat" class="card-link">DOWNLOAD &#8594;</a>
+                </article>
+
+                <!-- Script 2: Chrome Multi-Profile Shortcut -->
+                <article class="project-card">
+                    <h3 class="project-title">Multi-Profile Chrome</h3>
+                    <p class="project-desc">Solusi manajemen multi-akun untuk Google Chrome. Memindai struktur profil yang ada dan men-generate shortcut instan, memungkinkan perpindahan identitas kerja yang cepat.</p>
+                    <!-- Link GitHub v1.0 -->
+                    <a href="https://github.com/maxnmrantau/Chrome-Shortcut-Gen/releases/download/v1.0/Chrome.ShortGen.bat" class="card-link">DOWNLOAD &#8594;</a>
+                </article>
+
+            </div>
+        </section>
+
     </div>
 
-<script>
-    /* --- 1. MATRIX BACKGROUND --- */
-    const canvas = document.getElementById('matrix-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = [];
-    for (let x = 0; x < columns; x++) drops[x] = 1;
-
-    function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#0F0';
-        ctx.font = fontSize + 'px monospace';
-        for (let i = 0; i < drops.length; i++) {
-            const text = chars.charAt(Math.floor(Math.random() * chars.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-            drops[i]++;
-        }
-    }
-    setInterval(drawMatrix, 33);
-    window.addEventListener('resize', () => { 
-        canvas.width = window.innerWidth; 
-        canvas.height = window.innerHeight; 
-    });
-
-    /* --- 2. LOGIC LOGIN (FIXED) --- */
-    const loginScreen = document.getElementById('login-screen');
-    const loginInput = document.getElementById('login-password');
-    const loginBtn = document.getElementById('login-btn');
-    const loginMsg = document.getElementById('login-msg');
-    const correctPassword = "2021";
-
-    // Fungsi khusus untuk menjaga fokus agar bisa mengetik
-    function keepFocusLogin() {
-        // Jika layar login masih tampil, paksa fokus ke input password
-        if (loginScreen.style.display !== 'none') {
-            loginInput.focus();
-        }
-    }
-
-    // Jalankan fokus saat halaman dimuat
-    window.onload = function() {
-        keepFocusLogin();
-    };
-
-    // Jika user mengklik sembarang tempat saat di halaman login, kembalikan fokus ke password
-    document.addEventListener('click', (e) => {
-        keepFocusLogin();
-    });
-
-    function checkLogin() {
-        const val = loginInput.value;
-        if (val === correctPassword) {
-            loginMsg.className = 'msg-success';
-            loginMsg.innerText = "ACCESS GRANTED. LOADING...";
-            loginBtn.disabled = true;
-            loginInput.disabled = true;
-            
-            // Hapus listener klik global agar tidak mengganggu fokus terminal nanti
-            document.removeEventListener('click', keepFocusLogin);
-
-            // Delay sebentar sebelum pindah ke loading screen
-            setTimeout(() => {
-                loginScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loginScreen.style.display = 'none';
-                    startLoadingSequence(); // Mulai loading hacker
-                }, 500);
-            }, 1000);
-
-        } else {
-            loginMsg.className = 'msg-error';
-            loginMsg.innerText = "ACCESS DENIED. WRONG PASSWORD.";
-            loginInput.value = '';
-            keepFocusLogin(); // Pastikan fokus kembali setelah error
-            
-            // Efek getar
-            const box = document.querySelector('.login-box');
-            box.style.transform = "translateX(5px)";
-            setTimeout(() => box.style.transform = "translateX(-5px)", 50);
-            setTimeout(() => box.style.transform = "translateX(5px)", 100);
-            setTimeout(() => box.style.transform = "translateX(0)", 150);
-        }
-    }
-
-    loginBtn.addEventListener('click', checkLogin);
-    loginInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkLogin();
-    });
-
-    /* --- 3. LOGIC LOADING SCREEN --- */
-    const loadingScreen = document.getElementById('loading-screen');
-    const loadingText = document.getElementById('loading-text');
-    const progressBar = document.getElementById('progress-bar');
-    const mainContent = document.getElementById('main-content');
-    const cmdInput = document.getElementById('cmd-input');
-    const output = document.getElementById('output');
-
-    function startLoadingSequence() {
-        loadingScreen.style.opacity = '1';
-        loadingScreen.style.pointerEvents = 'auto'; // Pastikan bisa diklik jika perlu
-
-        const bootLogs = [
-            "Decrypting secure connection...",
-            "Downloading user profile...",
-            "Loading kernel modules...",
-            "Verifying integrity...",
-            "System ready."
-        ];
-
-        let logIndex = 0;
-        let progress = 0;
-
-        const interval = setInterval(() => {
-            if (Math.random() > 0.4 && logIndex < bootLogs.length) {
-                loadingText.textContent += bootLogs[logIndex] + "\n";
-                logIndex++;
-            } else if (Math.random() > 0.8) {
-                loadingText.textContent += `0x${Math.floor(Math.random()*16777215).toString(16)} [OK]\n`;
-            }
-
-            progress += Math.random() * 4;
-            if (progress > 100) progress = 100;
-            progressBar.style.width = progress + "%";
-            loadingScreen.scrollTop = loadingScreen.scrollHeight;
-
-            if (progress === 100 && logIndex >= bootLogs.length) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    loadingScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                        mainContent.style.opacity = '1';
-                        cmdInput.focus(); // Fokus otomatis ke terminal setelah loading selesai
-                    }, 800);
-                }, 500);
-            }
-        }, 60);
-    }
-
-    /* --- 4. LOGIC TERMINAL COMMANDS --- */
-    const db = {
-        help: {
-            title: 'Available Commands',
-            type: 'list',
-            items: [
-                { cmd: 'about', desc: 'Tentang saya' },
-                { cmd: 'album', desc: 'Lihat galeri foto' },
-                { cmd: 'project', desc: 'Daftar proyek' },
-                { cmd: 'skills', desc: 'Tech Stack' },
-                { cmd: 'clear', desc: 'Bersihkan terminal' }
-            ]
-        },
-        about: {
-            title: 'About Me',
-            type: 'text',
-            content: 'Saya adalah pengembang yang hidup di dalam Matrix. Suka membuat halaman web yang cepat dan aman.'
-        },
-        project: {
-            title: 'Projects',
-            type: 'list',
-            items: [
-                { cmd: 'Matrix-UI', desc: 'Web Framework' },
-                { cmd: 'Neo-Chat', desc: 'Encrypted Messaging' }
-            ]
-        },
-        skills: {
-            title: 'Tech Stack',
-            type: 'list',
-            items: [
-                { cmd: 'Frontend', desc: 'HTML, CSS, React' },
-                { cmd: 'Backend', desc: 'Node.js, Python' }
-            ]
-        },
-        album: {
-            title: 'Photo Gallery',
-            type: 'album',
-            images: [
-                'https://picsum.photos/seed/m1/400/400',
-                'https://picsum.photos/seed/m2/400/400',
-                'https://picsum.photos/seed/m3/400/400',
-                'https://picsum.photos/seed/m4/400/400',
-                'https://picsum.photos/seed/m5/400/400',
-                'https://picsum.photos/seed/m6/400/400'
-            ]
-        }
-    };
-
-    cmdInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            const cmd = cmdInput.value.trim().toLowerCase();
-            createLogEntry(`➜ ${cmdInput.value}`);
-            
-            if (cmd === 'clear') {
-                output.innerHTML = '';
-            } else if (cmd === '') {
-            } else if (db[cmd]) {
-                renderBox(db[cmd]);
-            } else {
-                createLogEntry(`Command not found: ${cmd}`, 'error');
-            }
-
-            cmdInput.value = '';
-            scrollToBottom();
-        }
-    });
-
-    // Event listener klik hanya untuk terminal (bukan login, karena login sudah handle di atas)
-    document.addEventListener('click', (e) => {
-        // Hanya fokus ke terminal jika login screen sudah hilang DAN loading screen sudah hilang
-        if (loginScreen.style.display === 'none' && loadingScreen.style.display === 'none') {
-            cmdInput.focus();
-        }
-    });
-
-    function createLogEntry(text, type = 'normal') {
-        const div = document.createElement('div');
-        div.className = 'log-entry';
-        if (type === 'error') div.classList.add('error');
-        div.innerText = text;
-        output.appendChild(div);
-    }
-
-    function renderBox(data) {
-        const boxDiv = document.createElement('div');
-        boxDiv.className = 'cmd-box';
-
-        const header = document.createElement('div');
-        header.className = 'cmd-box-header';
-        header.innerText = data.title;
-        boxDiv.appendChild(header);
-
-        if (data.type === 'text') {
-            const content = document.createElement('div');
-            content.style.color = '#d4d4d4';
-            content.innerText = data.content;
-            boxDiv.appendChild(content);
-        } else if (data.type === 'list') {
-            data.items.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'cmd-row';
-                row.innerHTML = `<span>${item.cmd}</span><span>${item.desc}</span>`;
-                boxDiv.appendChild(row);
-            });
-        } else if (data.type === 'album') {
-            const grid = document.createElement('div');
-            grid.className = 'album-grid';
-            data.images.forEach(imgUrl => {
-                const item = document.createElement('div');
-                item.className = 'photo-item';
-                const img = document.createElement('img');
-                img.src = imgUrl;
-                img.alt = "Photo";
-                img.loading = "lazy";
-                img.onclick = () => window.open(imgUrl, '_blank');
-                item.appendChild(img);
-                grid.appendChild(item);
-            });
-            boxDiv.appendChild(grid);
-        }
-        output.appendChild(boxDiv);
-    }
-
-    function scrollToBottom() {
-        output.scrollTop = output.scrollHeight;
-    }
-</script>
 </body>
 </html>
