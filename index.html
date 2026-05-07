@@ -17,15 +17,20 @@
             --surface: #181c27;
             --surface2: #1e2235;
             --border: rgba(255, 255, 255, 0.1); 
-            --accent: #63d2a8; /* Mint Green */
-            --accent2: #f5c542; /* Yellow */
-            --accent-red: #ff6b6b;
+            --accent-web: #61dafb;   /* Cyan */
+            --accent-desktop: #f5c542; /* Yellow */
+            --accent-script: #ff6b6b;  /* Red */
+            --accent-game: #d946ef;    /* Neon Purple */
             --text: #e8eaf0;
             --text-muted: #8b9bb4;
             
             --radius: 12px;
             --font-head: 'Space Mono', monospace;
             --font-body: 'DM Sans', sans-serif;
+            
+            /* Scrollbar Settings */
+            --scroll-track: #13151e;
+            --scroll-thumb: #333b4d;
         }
 
         /* --- RESET & GLOBAL --- */
@@ -36,19 +41,24 @@
             color: var(--text);
             font-family: var(--font-body);
             line-height: 1.5;
-            /* Grid Background Pattern */
             background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             background-size: 30px 30px;
-            padding-bottom: 60px;
+            padding-bottom: 80px;
         }
+
+        /* Custom Scrollbar for Webkit */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
         .container {
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
-            padding: 40px 20px 20px 20px;
+            padding: 40px 20px;
         }
 
         a { text-decoration: none; color: inherit; transition: 0.3s; }
@@ -82,35 +92,20 @@
             border: 2px solid var(--border); 
         }
 
-        .text-group {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
         .text-group h1 {
             font-family: var(--font-head);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--text);
-            line-height: 1.2;
             margin-bottom: 6px;
         }
+        .text-group p { font-size: 0.9rem; color: var(--text-muted); }
 
-        .text-group p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.3;
-        }
-
-        .profile-right {
-            display: flex;
-            gap: 15px;
-        }
+        .profile-right { display: flex; gap: 15px; }
 
         .box-btn {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: transparent; 
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -121,114 +116,173 @@
         }
 
         .box-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(99, 210, 168, 0.05);
+            border-color: var(--accent-web);
+            color: var(--accent-web);
+            background: rgba(97, 218, 251, 0.05);
             transform: translateY(-2px);
         }
 
         .box-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-        /* --- 2. PROJECTS GRID --- */
-        .category-block { margin-bottom: 40px; }
-
-        .category-title {
-            font-family: var(--font-head);
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            padding-left: 10px;
-            border-left: 3px solid;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .cat-web { border-color: #61dafb; }
-        .cat-desktop { border-color: var(--accent2); }
-        .cat-script { border-color: var(--accent-red); }
-        
-        .cat-web span { color: #61dafb; }
-        .cat-desktop span { color: var(--accent2); }
-        .cat-script span { color: var(--accent-red); }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 15px;
-        }
-
-        .project-card {
+        /* --- 2. ACCORDION / DROPDOWN SYSTEM --- */
+        .accordion-item {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .accordion-item:hover {
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        /* Header of the Dropdown */
+        .accordion-header {
+            width: 100%;
+            padding: 20px 25px;
+            background: var(--surface);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            text-align: left;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background: var(--surface2);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .cat-icon svg {
+            width: 20px; 
+            height: 20px;
+            stroke-width: 2;
+        }
+
+        .cat-title {
+            font-family: var(--font-head);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        /* Dynamic Accent Colors per Category */
+        .cat-web .cat-icon, .cat-web .chevron { color: var(--accent-web); stroke: var(--accent-web); }
+        .cat-web:hover .cat-title { color: var(--accent-web); }
+        
+        .cat-desktop .cat-icon, .cat-desktop .chevron { color: var(--accent-desktop); stroke: var(--accent-desktop); }
+        .cat-desktop:hover .cat-title { color: var(--accent-desktop); }
+
+        .cat-script .cat-icon, .cat-script .chevron { color: var(--accent-script); stroke: var(--accent-script); }
+        .cat-script:hover .cat-title { color: var(--accent-script); }
+
+        .cat-game .cat-icon, .cat-game .chevron { color: var(--accent-game); stroke: var(--accent-game); }
+        .cat-game:hover .cat-title { color: var(--accent-game); }
+
+        /* Chevron Animation */
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+        .accordion-item.active .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* --- 3. CONTENT & SCROLL AREA --- */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* The scrollable wrapper inside the dropdown */
+        .scroll-wrapper {
+            padding: 20px 25px;
+            max-height: 500px; 
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+        }
+
+        /* Webkit scrollbar for dropdown specifically */
+        .scroll-wrapper::-webkit-scrollbar { width: 6px; }
+        .scroll-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        /* Grid System inside dropdown */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+            padding-bottom: 10px;
+        }
+
+        /* Project Card Styling */
+        .project-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             transition: 0.2s;
-            position: relative;
             height: 100%;
-            overflow: visible; 
         }
 
         .project-card:hover {
             transform: translateY(-3px);
-            border-color: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
             background: var(--surface2);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 5;
-        }
-
-        .project-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0; right: 0;
-            width: 0; height: 0;
-            border-style: solid;
-            border-width: 0 0 12px 12px;
-            border-color: transparent transparent var(--border) transparent;
-            transition: 0.2s;
-        }
-        .project-card:hover::after {
-            border-color: transparent transparent var(--text) transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .project-title {
             font-family: var(--font-head);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--text);
-            margin-top: 0px;
         }
 
         .project-desc {
             font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             flex-grow: 1;
+            line-height: 1.4;
         }
 
         .card-link {
             margin-top: auto;
             font-family: var(--font-head);
-            font-size: 0.75rem;
-            color: var(--text);
+            font-size: 0.7rem;
+            color: var(--text-muted);
             display: flex; align-items: center; gap: 6px;
-            opacity: 0.7;
+            align-self: flex-start;
+            border-bottom: 1px dotted transparent;
         }
-        .project-card:hover .card-link { opacity: 1; color: var(--accent); }
+        
+        .project-card:hover .card-link { 
+            color: var(--text); 
+            border-color: var(--text);
+        }
 
-        /* Responsive Mobile */
-        @media (max-width: 768px) {
-            .profile-card {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-                padding: 20px;
-            }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .profile-card { flex-direction: column; text-align: center; }
             .profile-left { flex-direction: column; }
             .profile-right { width: 100%; justify-content: center; }
             .grid { grid-template-columns: 1fr; }
@@ -262,113 +316,186 @@
             </div>
         </header>
 
-        <!-- CONTENT: WEBSITE PROJECTS -->
-        <section class="category-block cat-web">
-            <div class="category-title cat-web">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                <span>01. WEBSITE_PROJECTS</span>
+        <!-- ACCORDION SYSTEM -->
+
+        <!-- 1. WEBSITE PROJECTS -->
+        <div class="accordion-item cat-web">
+            <button class="accordion-header">
+                <div class="header-left">
+                    <div class="cat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    </div>
+                    <span class="cat-title">01. WEBSITE_PROJECTS</span>
+                </div>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+                <div class="scroll-wrapper">
+                    <div class="grid">
+                        <!-- Project Items -->
+                        <article class="project-card">
+                            <h3 class="project-title">Free PDF Tools</h3>
+                            <p class="project-desc">Alat all-in-one untuk manipulasi PDF (merge, split, compress) di browser.</p>
+                            <a href="https://free-pdftools.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Batch Kolase Maker</h3>
+                            <p class="project-desc">Membuat kolase foto secara massal, cocok untuk desain cepat.</p>
+                            <a href="https://batch-kolase.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Tanda Tangan PDF</h3>
+                            <p class="project-desc">Tambahkan tanda tangan digital ke dokumen PDF secara legal.</p>
+                            <a href="https://tandatangan-pdf.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Barcode Genku</h3>
+                            <p class="project-desc">Generator barcode cepat untuk inventaris dan POS dengan format standar.</p>
+                            <a href="https://barcode-genku.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Silent Stream</h3>
+                            <p class="project-desc">Menghapus audio pada video (mute video) tanpa mengurangi kualitas visual.</p>
+                            <a href="https://silent-stream.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">AI Answer Key Assistant</h3>
+                            <p class="project-desc">Cek jawaban otomatis berbasis dokumen PDF dan buat soal baru (Google Gemini AI).</p>
+                            <a href="https://ai-answer-key-assistant.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
+                        </article>
+                    </div>
+                </div>
             </div>
-            <div class="grid">
-                
-                <!-- Project 1 -->
-                <article class="project-card">
-                    <h3 class="project-title">Free PDF Tools</h3>
-                    <p class="project-desc">Alat all-in-one untuk manipulasi PDF (merge, split, compress) langsung di browser tanpa upload ke server.</p>
-                    <a href="https://free-pdftools.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
-                </article>
+        </div>
 
-                <!-- Project 2 -->
-                <article class="project-card">
-                    <h3 class="project-title">Batch Kolase Maker</h3>
-                    <p class="project-desc">Membuat kolase foto secara massal dengan mudah, cocok untuk kebutuhan desain cepat atau dokumentasi.</p>
-                    <a href="https://batch-kolase.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
-                </article>
+        <!-- 2. DESKTOP APPLICATIONS -->
+        <div class="accordion-item cat-desktop">
+            <button class="accordion-header">
+                <div class="header-left">
+                    <div class="cat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    </div>
+                    <span class="cat-title">02. DESKTOP_APPLICATIONS</span>
+                </div>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+                <div class="scroll-wrapper">
+                    <div class="grid">
+                        <!-- Project 1 -->
+                        <article class="project-card">
+                            <h3 class="project-title">File Checker</h3>
+                            <p class="project-desc">Audit integritas data copy-paste. Bandingkan file sumber dan tujuan, pindahkan file yang hilang ke folder khusus.</p>
+                            <a href="https://github.com/maxnmrantau/filechecker/releases/download/v.6.2/FileChecker-Setup.v6.2.exe" class="card-link">DOWNLOAD &#8594;</a>
+                        </article>
 
-                <!-- Project 3 -->
-                <article class="project-card">
-                    <h3 class="project-title">Tanda Tangan PDF</h3>
-                    <p class="project-desc">Tambahkan tanda tangan digital ke dokumen PDF secara legal dan aman tanpa perlu software berat.</p>
-                    <a href="https://tandatangan-pdf.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
-                </article>
-
-                <!-- Project 4 -->
-                <article class="project-card">
-                    <h3 class="project-title">Barcode Genku</h3>
-                    <p class="project-desc">Generator barcode cepat untuk inventaris, POS, atau kebutuhan labeling lainnya dengan format standar.</p>
-                    <a href="https://barcode-genku.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
-                </article>
-
-                <!-- Project 5: SILENT STREAM -->
-                <article class="project-card">
-                    <h3 class="project-title">Silent Stream</h3>
-                    <p class="project-desc">Alat praktis untuk menghapus audio pada video (mute video) secara instan tanpa mengurangi kualitas visual.</p>
-                    <a href="https://silent-stream.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
-                </article>
-
-                <!-- Project 6: AI ANSWER KEY -->
-                <article class="project-card">
-                    <h3 class="project-title">AI Answer Key Assistant</h3>
-                    <p class="project-desc">Aplikasi berbasis AI yang dirancang untuk membantu pengajar dan siswa dalam memeriksa jawaban secara otomatis berdasarkan dokumen PDF kunci jawaban, serta membuat soal baru secara instan menggunakan teknologi Google Gemini AI.</p>
-                    <a href="https://ai-answer-key-assistant.vercel.app/" class="card-link" target="_blank">VISIT &#8594;</a>
-                </article>
-
+                        <!-- Project 2 (NEW) -->
+                        <article class="project-card">
+                            <h3 class="project-title">POD Renamer</h3>
+                            <p class="project-desc">Alat bantu otomatisasi untuk mengubah nama file dokumen POD (Proof of Delivery) secara massal agar sesuai dengan format standar arsip.</p>
+                            <a href="https://github.com/maxnmrantau/pod-renamer/releases/download/v1.1/POD.Renamer.-.J.T.Express.NM.Rantau.exe" class="card-link">DOWNLOAD &#8594;</a>
+                        </article>
+                    </div>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <!-- 2. DESKTOP (FINAL CONFIRMED LINKS) -->
-        <section class="category-block cat-desktop">
-            <div class="category-title cat-desktop">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                <span>02. DESKTOP_APPLICATIONS</span>
+        <!-- 3. AUTOMATION SCRIPTS -->
+        <div class="accordion-item cat-script">
+            <button class="accordion-header">
+                <div class="header-left">
+                    <div class="cat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    </div>
+                    <span class="cat-title">03. AUTOMATION_SCRIPTS</span>
+                </div>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+                <div class="scroll-wrapper">
+                    <div class="grid">
+                        <article class="project-card">
+                            <h3 class="project-title">Multi-Profile Edge</h3>
+                            <p class="project-desc">Deteksi profil Microsoft Edge dan buat shortcut desktop unik instan.</p>
+                            <a href="https://github.com/maxnmrantau/edgeshotcutgen/releases/download/v1.0/Edge.ShortcutGen.bat" class="card-link">DOWNLOAD &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Multi-Profile Chrome</h3>
+                            <p class="project-desc">Scan struktur profil Chrome dan generate shortcut untuk perpindahan akun cepat.</p>
+                            <a href="https://github.com/maxnmrantau/Chrome-Shortcut-Gen/releases/download/v1.0/Chrome.ShortGen.bat" class="card-link">DOWNLOAD &#8594;</a>
+                        </article>
+                    </div>
+                </div>
             </div>
-            <div class="grid">
-                
-                <!-- Desktop Project 1: Network Tool -->
-                <article class="project-card">
-                    <h3 class="project-title">Network Tool</h3>
-                    <p class="project-desc">Utilitas untuk monitoring jaringan LAN kantor.</p>
-                    <a href="#" class="card-link">DOWNLOAD &#8594;</a>
-                </article>
+        </div>
 
-                <!-- Desktop Project 2: FILE CHECKER (CONFIRMED) -->
-                <article class="project-card">
-                    <h3 class="project-title">File Checker</h3>
-                    <p class="project-desc">Solusi otomatisasi untuk audit integritas data copy-paste. Membandingkan struktur file sumber dan tujuan, mengidentifikasi file yang hilang, serta memindahkan file tersebut ke folder khusus secara instan.</p>
-                    <!-- Link GitHub v.6.2 -->
-                    <a href="https://github.com/maxnmrantau/filechecker/releases/download/v.6.2/FileChecker-Setup.v6.2.exe" class="card-link">DOWNLOAD &#8594;</a>
-                </article>
-
+        <!-- 4. GAME PROJECTS -->
+        <div class="accordion-item cat-game">
+            <button class="accordion-header">
+                <div class="header-left">
+                    <div class="cat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                    </div>
+                    <span class="cat-title">04. GAME_PROJECTS</span>
+                </div>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+                <div class="scroll-wrapper">
+                    <div class="grid">
+                        <article class="project-card">
+                            <h3 class="project-title">Neon Space Defender</h3>
+                            <p class="project-desc">Game shooter klasik bergaya neon. Bertahan hidup dari gelombang alien.</p>
+                            <a href="#" class="card-link">PLAY NOW &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Cyber Maze</h3>
+                            <p class="project-desc">Teka-teki labirin 3D dengan visual glitch art dan musik synthwave.</p>
+                            <a href="#" class="card-link">PLAY NOW &#8594;</a>
+                        </article>
+                        <article class="project-card">
+                            <h3 class="project-title">Retro Pong AI</h3>
+                            <p class="project-desc">Pong klasik melawan AI yang belajar dari gaya bermainmu.</p>
+                            <a href="#" class="card-link">PLAY NOW &#8594;</a>
+                        </article>
+                         <article class="project-card">
+                            <h3 class="project-title">Pixel Jump</h3>
+                            <p class="project-desc">Platformer endless runner dengan mekanik gravitasi unik.</p>
+                            <a href="#" class="card-link">PLAY NOW &#8594;</a>
+                        </article>
+                    </div>
+                </div>
             </div>
-        </section>
-
-        <!-- 3. SCRIPT (FINAL CONFIRMED LINKS) -->
-        <section class="category-block cat-script">
-            <div class="category-title cat-script">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                <span>03. AUTOMATION_SCRIPTS</span>
-            </div>
-            <div class="grid">
-                
-                <!-- Script 1: Edge Multi-Profile Shortcut -->
-                <article class="project-card">
-                    <h3 class="project-title">Multi-Profile Edge</h3>
-                    <p class="project-desc">Otomatisasi akses browser. Secara cerdas mendeteksi seluruh profil pengguna di Microsoft Edge dan langsung membuat shortcut desktop unik untuk setiap akun secara massal.</p>
-                    <!-- Link GitHub v1.0 -->
-                    <a href="https://github.com/maxnmrantau/edgeshotcutgen/releases/download/v1.0/Edge.ShortcutGen.bat" class="card-link">DOWNLOAD &#8594;</a>
-                </article>
-
-                <!-- Script 2: Chrome Multi-Profile Shortcut -->
-                <article class="project-card">
-                    <h3 class="project-title">Multi-Profile Chrome</h3>
-                    <p class="project-desc">Solusi manajemen multi-akun untuk Google Chrome. Memindai struktur profil yang ada dan men-generate shortcut instan, memungkinkan perpindahan identitas kerja yang cepat.</p>
-                    <!-- Link GitHub v1.0 -->
-                    <a href="https://github.com/maxnmrantau/Chrome-Shortcut-Gen/releases/download/v1.0/Chrome.ShortGen.bat" class="card-link">DOWNLOAD &#8594;</a>
-                </article>
-
-            </div>
-        </section>
+        </div>
 
     </div>
 
+    <!-- SCRIPT FOR ACCORDION FUNCTIONALITY -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordions = document.querySelectorAll('.accordion-header');
+
+            accordions.forEach(acc => {
+                acc.addEventListener('click', function() {
+                    // Toggle active class on parent item
+                    const item = this.parentElement;
+                    const isActive = item.classList.contains('active');
+                    
+                    // Optional: Close others when opening one
+                    document.querySelectorAll('.accordion-item').forEach(i => {
+                        i.classList.remove('active');
+                        i.querySelector('.accordion-content').style.maxHeight = null;
+                    });
+
+                    // Toggle current
+                    if (!isActive) {
+                        item.classList.add('active');
+                        const content = item.querySelector('.accordion-content');
+                        content.style.maxHeight = "600px"; 
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
