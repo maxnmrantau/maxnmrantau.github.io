@@ -59,6 +59,20 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- MATRIX RAIN BACKGROUND --- */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         a { text-decoration: none; color: inherit; transition: 0.3s; }
@@ -291,6 +305,8 @@
 </head>
 <body>
 
+    <canvas id="matrix-bg"></canvas>
+
     <div class="container">
         
         <!-- HEADER: PROFILE CARD -->
@@ -313,6 +329,10 @@
                 <a href="https://www.linkedin.com/in/makmurriansyah/" class="box-btn" title="LinkedIn">
                     <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                 </a>
+                <button id="musicToggle" class="box-btn" title="Putar / Jeda Musik">
+                    <svg id="musicIconPlay" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                    <svg id="musicIconPause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
             </div>
         </header>
 
@@ -508,7 +528,51 @@
 
     </div>
 
-    <!-- SCRIPT FOR ACCORDION FUNCTIONALITY -->
+    <!-- BACKGROUND MUSIC -->
+    <audio id="bgMusic" src="https://maxnmrantau.github.io/Blackout%20Proxy.mp3" preload="auto" loop></audio>
+
+    <!-- SCRIPT FOR MATRIX RAIN -->
+    <script>
+        (function () {
+            const canvas = document.getElementById('matrix-bg');
+            const ctx = canvas.getContext('2d');
+
+            const fontSize = 16;
+            let columns, drops;
+
+            function resize() {
+                canvas.height = window.innerHeight;
+                canvas.width = window.innerWidth;
+                columns = Math.floor(canvas.width / fontSize);
+                drops = Array(columns).fill(1);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            function draw() {
+                ctx.fillStyle = 'rgba(15, 17, 23, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillStyle = Math.random() > 0.975 ? '#9fe8ff' : '#61dafb';
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 50);
+        })();
+    </script>
+
+    <!-- SCRIPT FOR ACCORDION FUNCTIONALITY + MUSIC -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const accordions = document.querySelectorAll('.accordion-header');
@@ -518,7 +582,7 @@
                     // Toggle active class on parent item
                     const item = this.parentElement;
                     const isActive = item.classList.contains('active');
-                    
+
                     // Optional: Close others when opening one
                     document.querySelectorAll('.accordion-item').forEach(i => {
                         i.classList.remove('active');
@@ -529,9 +593,50 @@
                     if (!isActive) {
                         item.classList.add('active');
                         const content = item.querySelector('.accordion-content');
-                        content.style.maxHeight = "600px"; 
+                        content.style.maxHeight = "600px";
                     }
                 });
+            });
+
+            /* --- MUSIC PLAYER --- */
+            const musicBtn = document.getElementById('musicToggle');
+            const audio = document.getElementById('bgMusic');
+            const iconPlay = document.getElementById('musicIconPlay');
+            const iconPause = document.getElementById('musicIconPause');
+
+            function setPlaying(state) {
+                if (state) {
+                    iconPlay.style.display = 'none';
+                    iconPause.style.display = 'block';
+                    musicBtn.style.borderColor = 'var(--accent-web)';
+                    musicBtn.style.color = 'var(--accent-web)';
+                } else {
+                    iconPlay.style.display = 'block';
+                    iconPause.style.display = 'none';
+                    musicBtn.style.borderColor = '';
+                    musicBtn.style.color = '';
+                }
+            }
+
+            musicBtn.addEventListener('click', () => {
+                if (audio.paused) {
+                    audio.play().catch(() => {});
+                } else {
+                    audio.pause();
+                }
+            });
+
+            audio.addEventListener('play', () => setPlaying(true));
+            audio.addEventListener('pause', () => setPlaying(false));
+
+            // Coba autoplay saat halaman dibuka (browser biasanya memblokir bersuara)
+            // Jika diblokir, musik mulai otomatis pada interaksi pertama user.
+            audio.play().then(() => {}).catch(() => {
+                const tryPlay = () => {
+                    audio.play().catch(() => {});
+                    window.removeEventListener('click', tryPlay);
+                };
+                window.addEventListener('click', tryPlay);
             });
         });
     </script>
